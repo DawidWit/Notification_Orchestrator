@@ -4,17 +4,21 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-// Create a DynamoDB client instance
-const ddbClient = new DynamoDBClient({
-    region: process.env.AWS_REGION || 'us-east-1',
-    endpoint: process.env.DYNAMODB_ENDPOINT || 'http://localhost:8000',
-    credentials: {
+const isLocal = process.env.DYNAMODB_ENDPOINT != null;
+
+const clientConfig = {
+    region: process.env.AWS_REGION_CUSTOM || process.env.AWS_REGION || 'us-east-1',
+};
+
+if (isLocal) {
+    clientConfig.endpoint = process.env.DYNAMODB_ENDPOINT;
+    clientConfig.credentials = {
         accessKeyId: process.env.AWS_ACCESS_KEY_ID || "dummy",
         secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || "dummy",
-    },
-});
+    };
+}
 
-// Create a DynamoDB Document Client instance for easier data manipulation
+const ddbClient = new DynamoDBClient(clientConfig);
 const ddbDocClient = DynamoDBDocumentClient.from(ddbClient);
 
 export { ddbClient, ddbDocClient };

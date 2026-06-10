@@ -1,0 +1,13 @@
+# Terraform state — contains secrets and resource IDs, never commit
+*.tfstate
+*.tfstate.backup
+.terraform/
+.terraform.lock.hcl
+
+# Crash logs
+crash.log
+crash.*.log
+
+# Variable override files (may contain secrets)
+*.tfvars
+!example.tfvars
