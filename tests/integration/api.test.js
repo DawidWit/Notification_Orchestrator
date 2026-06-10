@@ -1,6 +1,5 @@
 import request from 'supertest';
 import app from '../../src/app.js';
-import { expect } from 'chai'; // Or remove this if you prefer Jest's global expect
 import { ddbDocClient, ddbClient } from '../../src/config/dynamodb.js';
 import { DeleteCommand, PutCommand } from '@aws-sdk/lib-dynamodb';
 import { CreateTableCommand, DescribeTableCommand } from '@aws-sdk/client-dynamodb';
@@ -75,8 +74,8 @@ describe('API Integration Tests', () => {
                 .send(eventPayload)
                 .expect(202);
 
-            expect(res.body.decision).to.equal("PROCESS_NOTIFICATION");
-            expect(res.body.channels).to.deep.equal(["email", "push"]);
+            expect(res.body.decision).toBe("PROCESS_NOTIFICATION");
+            expect(res.body.channels).toEqual(["email", "push"]);
         });
 
         it('should return 200 DO_NOT_NOTIFY when DND is active', async () => {
@@ -106,8 +105,8 @@ describe('API Integration Tests', () => {
                 .send(eventPayload)
                 .expect(200);
 
-            expect(res.body.decision).to.equal("DO_NOT_NOTIFY");
-            expect(res.body.reason).to.equal("DND_ACTIVE");
+            expect(res.body.decision).toBe("DO_NOT_NOTIFY");
+            expect(res.body.reason).toBe("DND_ACTIVE");
         });
 
         it('should return 400 for invalid event payload', async () => {
@@ -121,7 +120,7 @@ describe('API Integration Tests', () => {
                 .send(invalidPayload)
                 .expect(400);
 
-            expect(res.body.message).to.exist;
+            expect(res.body.message).toBeDefined();
         });
     });
 
@@ -141,8 +140,8 @@ describe('API Integration Tests', () => {
                 .get(`/preferences/${testUserId}`)
                 .expect(200);
 
-            expect(res.body.userId).to.equal(testUserId);
-            expect(res.body.preferences).to.deep.include(userPref.preferences);
+            expect(res.body.userId).toBe(testUserId);
+            expect(res.body.preferences).toMatchObject(userPref.preferences);
         });
 
         it('should return 404 if user preferences not found', async () => {
@@ -169,8 +168,8 @@ describe('API Integration Tests', () => {
                 .send(newPreferences)
                 .expect(201);
 
-            expect(res.body.userId).to.equal(testUserId);
-            expect(res.body.preferences).to.deep.equal(newPreferences.preferences);
+            expect(res.body.userId).toBe(testUserId);
+            expect(res.body.preferences).toEqual(newPreferences.preferences);
         });
 
         it('should return 400 for invalid preference payload', async () => {
@@ -185,7 +184,7 @@ describe('API Integration Tests', () => {
                 .send(invalidPayload)
                 .expect(400);
 
-            expect(res.body.message).to.exist;
+            expect(res.body.message).toBeDefined();
         });
     });
 
@@ -219,9 +218,9 @@ describe('API Integration Tests', () => {
                 .send(updatePayload)
                 .expect(200);
 
-            expect(res.body.userId).to.equal(testUserId);
-            expect(res.body.preferences.item_shipped.channels).to.deep.include("sms");
-            expect(res.body.preferences.security_alert.channels).to.deep.equal(["push"]); // Other preferences unchanged
+            expect(res.body.userId).toBe(testUserId);
+            expect(res.body.preferences.item_shipped.channels).toContain("sms");
+            expect(res.body.preferences.security_alert.channels).toEqual(["push"]);
         });
 
         it('should return 200 and update dnd windows', async () => {
@@ -236,8 +235,8 @@ describe('API Integration Tests', () => {
                 .send(updatePayload)
                 .expect(200);
 
-            expect(res.body.userId).to.equal(testUserId);
-            expect(res.body.dndWindows).to.deep.equal(updatePayload.dndWindows);
+            expect(res.body.userId).toBe(testUserId);
+            expect(res.body.dndWindows).toEqual(updatePayload.dndWindows);
         });
 
         it('should return 400 for invalid update payload', async () => {
@@ -252,7 +251,7 @@ describe('API Integration Tests', () => {
                 .send(invalidPayload)
                 .expect(400);
 
-            expect(res.body.message).to.exist;
+            expect(res.body.message).toBeDefined();
         });
     });
 });
