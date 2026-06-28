@@ -1,11 +1,11 @@
-import type { Request, Response } from 'express';
+import type { Request, Response, NextFunction } from 'express';
 import {
   getUserPreferences,
   upsertUserPreferences,
   updateSpecificUserPreferences,
 } from '../services/preferenceService.js';
 
-export const getPreferencesForUser = async (req: Request<{ userId: string }>, res: Response): Promise<void> => {
+export const getPreferencesForUser = async (req: Request<{ userId: string }>, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { userId } = req.params;
     const preferences = await getUserPreferences(userId);
@@ -16,24 +16,22 @@ export const getPreferencesForUser = async (req: Request<{ userId: string }>, re
     }
     res.status(200).json(preferences);
   } catch (error) {
-    console.error('Error getting preferences:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    next(error);
   }
 };
 
-export const setPreferencesForUser = async (req: Request<{ userId: string }>, res: Response): Promise<void> => {
+export const setPreferencesForUser = async (req: Request<{ userId: string }>, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { userId } = req.params;
     const { preferences, dndWindows } = req.body;
     const newPreferences = await upsertUserPreferences(userId, preferences, dndWindows);
     res.status(201).json(newPreferences);
   } catch (error) {
-    console.error('Error setting preferences:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    next(error);
   }
 };
 
-export const updatePreferencesForUser = async (req: Request<{ userId: string }>, res: Response): Promise<void> => {
+export const updatePreferencesForUser = async (req: Request<{ userId: string }>, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { userId } = req.params;
     const updated = await updateSpecificUserPreferences(userId, req.body);
@@ -44,7 +42,6 @@ export const updatePreferencesForUser = async (req: Request<{ userId: string }>,
     }
     res.status(200).json(updated);
   } catch (error) {
-    console.error('Error updating preferences:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    next(error);
   }
 };

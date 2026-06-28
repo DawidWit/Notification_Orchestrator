@@ -2,6 +2,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 import eventRoutes from './routes/eventRoutes.js';
 import preferenceRoutes from './routes/preferenceRoutes.js';
+import { errorHandler } from './middleware/errorHandler.js';
 
 dotenv.config();
 
@@ -16,6 +17,8 @@ app.get('/', (_req, res) => {
 
 app.use('/events', eventRoutes);
 app.use('/preferences', preferenceRoutes);
+
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 3000;
 
