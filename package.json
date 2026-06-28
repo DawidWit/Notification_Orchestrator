@@ -2,10 +2,11 @@
   "name": "notification_orchestrator_dawid_witczak",
   "version": "1.0.0",
   "description": "Notification Orchestrator made for recruitment purposes",
-  "main": "src/app.js",
+  "main": "dist/app.js",
   "scripts": {
-    "start": "node src/app.js",
-    "dev": "nodemon src/app.js",
+    "build": "tsc",
+    "start": "node dist/app.js",
+    "dev": "tsc --watch & nodemon dist/app.js",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "test:unit": "node --experimental-vm-modules node_modules/jest/bin/jest.js tests/unit",
     "test:integration": "node --experimental-vm-modules node_modules/jest/bin/jest.js tests/integration"
@@ -33,8 +34,14 @@
     "winston": "^3.17.0"
   },
   "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^26.0.1",
+    "@types/supertest": "^7.2.0",
     "jest": "^30.0.4",
     "nodemon": "^3.1.10",
-    "supertest": "^7.1.3"
+    "supertest": "^7.1.3",
+    "ts-jest": "^29.4.11",
+    "typescript": "^6.0.3"
   }
 }
