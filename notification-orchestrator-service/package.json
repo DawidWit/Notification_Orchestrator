@@ -1,5 +1,5 @@
 {
-  "name": "notification-service",
+  "name": "notification-orchestrator-service",
   "version": "1.0.0",
   "description": "Notification Orchestrator made for recruitment purposes",
   "main": "dist/app.js",
@@ -24,6 +24,7 @@
   },
   "homepage": "https://github.com/DawidWit/Notification_Orchestrator_Dawid_Witczak#readme",
   "dependencies": {
+    "shared": "*",
     "@aws-sdk/client-dynamodb": "^3.844.0",
     "@aws-sdk/lib-dynamodb": "^3.844.0",
     "deepmerge": "^4.3.1",

@@ -1,13 +1,13 @@
 services:
-  # Service for Notification service
-  notification-service:
-    build: ./notification-service
-    image: notification-service
-    container_name: notification-service
+  # Service for Notification Orchestrator service
+  notification-orchestrator-service:
+    build: ./notification-orchestrator-service
+    image: notification-orchestrator-service
+    container_name: notification-orchestrator-service
     ports:
       - "3000:3000" # Map host port 3000 to container port 3000
     volumes:
-      - ./notification-service:/app
+      - ./notification-orchestrator-service:/app
       - /app/node_modules
     depends_on:
       - dynamodb # Ensure DynamoDB Local is started before the app

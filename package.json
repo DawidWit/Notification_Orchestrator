@@ -2,8 +2,9 @@
   "name": "notification-orchestrator-monorepo",
   "private": true,
   "workspaces": [
-    "notification-service",
-    "logging-service"
+    "notification-orchestrator-service",
+    "logging-service",
+    "shared"
   ],
   "scripts": {
     "build": "npm run build --workspaces --if-present",
