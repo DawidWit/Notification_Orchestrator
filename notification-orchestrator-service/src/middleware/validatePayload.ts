@@ -1,17 +1,36 @@
-import Joi from 'joi';
-import type { Request, Response, NextFunction } from 'express';
+import Joi from "joi";
+import type { Request, Response, NextFunction } from "express";
+import { logger } from "../config/logger.js";
 
 const eventTypePreferenceSchema = Joi.object({
   enabled: Joi.boolean().required(),
-  channels: Joi.array().items(Joi.string().valid('email', 'sms', 'push')).required(),
+  channels: Joi.array()
+    .items(Joi.string().valid("email", "sms", "push"))
+    .required(),
 });
 
 const dndWindowSchema = Joi.object({
   dayOfWeek: Joi.alternatives()
     .try(
-      Joi.string().valid('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'),
+      Joi.string().valid(
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+        "Sunday",
+      ),
       Joi.array().items(
-        Joi.string().valid('Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'),
+        Joi.string().valid(
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+          "Sunday",
+        ),
       ),
     )
     .required(),
@@ -23,11 +42,13 @@ const dndWindowSchema = Joi.object({
     .optional(),
   isFullDay: Joi.boolean().default(false),
 })
-  .xor('startTime', 'isFullDay')
-  .xor('endTime', 'isFullDay');
+  .xor("startTime", "isFullDay")
+  .xor("endTime", "isFullDay");
 
 const preferenceFields = {
-  preferences: Joi.object().pattern(Joi.string(), eventTypePreferenceSchema).optional(),
+  preferences: Joi.object()
+    .pattern(Joi.string(), eventTypePreferenceSchema)
+    .optional(),
   dndWindows: Joi.array().items(dndWindowSchema).optional(),
 };
 
@@ -46,10 +67,24 @@ const preferenceUpdateSchema = Joi.object(preferenceFields).min(1);
 export const validatePayload =
   (schema: Joi.ObjectSchema) =>
   (req: Request, res: Response, next: NextFunction): void => {
-    const dataToValidate = req.body === undefined || req.body === null ? {} : req.body;
+    const dataToValidate =
+      req.body === undefined || req.body === null ? {} : req.body;
 
     const { error } = schema.validate(dataToValidate);
     if (error) {
+      logger.warn("Payload validation failed", {
+        correlationId: req.body?.eventId,
+        userId: req.body?.userId,
+        http: {
+          method: req.method,
+          path: req.path,
+          status: 400,
+        },
+        error: {
+          message: error.details[0].message,
+        },
+      });
+
       res.status(400).json({ message: error.details[0].message });
       return;
     }

@@ -1,3 +1,3 @@
-export * from "./logTypes.js";
-export * from "./microservices.js";
+export * from "./models/logTypes.js";
+export * from "./models/microservices.js";
 export * from "./logFactory.js";

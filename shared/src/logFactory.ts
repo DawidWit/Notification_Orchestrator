@@ -1,17 +1,23 @@
 import { randomUUID } from "crypto";
 import os from "os";
-import { MicroserviceName } from "./microservices.js";
-import { LogEvent, LogLevel, LogContext, LogMeta } from "./logTypes.js";
+import { MicroserviceName } from "./models/microservices.js";
+import {
+  LogEvent,
+  LogLevel,
+  LogContext,
+  LogMeta,
+  LogEnvironment,
+} from "./models/logTypes.js";
 
 export class LogFactory {
-  private serviceName: MicroserviceName[keyof MicroserviceName];
-  private environment: "production" | "staging" | "development";
+  private serviceName: MicroserviceName;
+  private environment: LogEnvironment;
   private version: string;
   private hostname: string;
 
   constructor(options: {
-    serviceName: MicroserviceName[keyof MicroserviceName];
-    environment?: "production" | "staging" | "development";
+    serviceName: MicroserviceName;
+    environment?: LogEnvironment;
     version?: string;
     hostname?: string;
   }) {
@@ -49,7 +55,7 @@ export class LogFactory {
       meta.codeContext = codeContext;
     }
 
-    return {
+    const logEvent: LogEvent = {
       eventId: randomUUID(),
       timestamp: new Date().toISOString(),
       serviceName: this.serviceName,
@@ -59,6 +65,15 @@ export class LogFactory {
       payload,
       meta,
     };
+
+    const jsonOutput = JSON.stringify(logEvent);
+    if (level === "error") {
+      console.error(jsonOutput);
+    } else {
+      console.log(jsonOutput);
+    }
+
+    return logEvent;
   }
 
   public info(

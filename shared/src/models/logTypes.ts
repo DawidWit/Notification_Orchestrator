@@ -2,9 +2,10 @@ import { MicroserviceName } from "./microservices.js";
 
 export type LogLevel = "info" | "warn" | "error" | "debug";
 
-// Global infrastructure tags added by Winston automatically
+export type LogEnvironment = "production" | "staging" | "development";
+
 export interface LogMeta {
-  environment: "production" | "staging" | "development";
+  environment: LogEnvironment;
   version: string;
   hostname: string;
   codeContext?: string;
@@ -14,7 +15,7 @@ export interface LogContext {
   userId?: string;
   correlationId?: string;
   http?: {
-    method: "GET" | "POST" | "PUT" | "DELETE";
+    method: string;
     path: string;
     status: number;
     responseTimeMs?: number;
@@ -29,7 +30,7 @@ export interface LogContext {
 export interface LogEvent {
   eventId: string;
   timestamp: string; // ISO-8601 Timestamp
-  serviceName: MicroserviceName[keyof MicroserviceName];
+  serviceName: MicroserviceName;
   level: LogLevel;
   message: string;
   context?: LogContext;

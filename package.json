@@ -7,7 +7,7 @@
     "shared"
   ],
   "scripts": {
-    "build": "npm run build --workspaces --if-present",
+    "build": "npm run build -w shared && npm run build --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
     "start": "npm run start --workspaces --if-present"
   }
