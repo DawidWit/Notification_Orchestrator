@@ -92,6 +92,12 @@ public class DeliveryRecord {
 		this.updatedAt = Instant.now();
 	}
 
+	/** Marks this delivery as successfully sent, counting the attempt. */
+	public void markSent() {
+		this.attemptCount++;
+		this.status = DeliveryStatus.SENT;
+	}
+
 	public Long getId() {
 		return id;
 	}
