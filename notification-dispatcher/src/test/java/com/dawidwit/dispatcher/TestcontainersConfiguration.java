@@ -7,19 +7,25 @@ import org.testcontainers.kafka.KafkaContainer;
 import org.testcontainers.mssqlserver.MSSQLServerContainer;
 import org.testcontainers.utility.DockerImageName;
 
+/**
+ * Shared integration-test infrastructure: real Kafka and MS SQL Server in throwaway Docker
+ * containers, auto-wired into the app via {@code @ServiceConnection}. Imported by integration tests
+ * that need the full context.
+ */
 @TestConfiguration(proxyBeanMethods = false)
-class TestcontainersConfiguration {
+public class TestcontainersConfiguration {
 
 	@Bean
 	@ServiceConnection
 	KafkaContainer kafkaContainer() {
-		return new KafkaContainer(DockerImageName.parse("apache/kafka-native:latest"));
+		return new KafkaContainer(DockerImageName.parse("apache/kafka-native:4.3.1"));
 	}
 
 	@Bean
 	@ServiceConnection
 	MSSQLServerContainer sqlServerContainer() {
-		return new MSSQLServerContainer(DockerImageName.parse("mcr.microsoft.com/mssql/server:latest"));
+		// acceptLicense() is mandatory or the SQL Server image refuses to start.
+		return new MSSQLServerContainer(DockerImageName.parse("mcr.microsoft.com/mssql/server:2022-latest"))
+				.acceptLicense();
 	}
-
 }

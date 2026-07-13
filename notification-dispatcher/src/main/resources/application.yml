@@ -15,3 +15,25 @@ spring:
 
   flyway:
     enabled: true               # Runs the migrations in classpath:db/migration on startup.
+
+  kafka:
+    # Broker address comes from the environment (SPRING_KAFKA_BOOTSTRAP_SERVERS); integration tests
+    # get it from Testcontainers via @ServiceConnection. Deserializers are wired in KafkaConsumerConfig
+    # so the JSON value deserializer uses Spring's JSR-310-aware ObjectMapper.
+    consumer:
+      group-id: notification-dispatcher
+      auto-offset-reset: earliest   # A fresh consumer group reads decisions from the start of the topic.
+
+# Emit the shared cross-service structured-log JSON (see shared/src/logFactory.ts) for all console output.
+logging:
+  structured:
+    format:
+      console: com.dawidwit.dispatcher.logging.SharedLogEventStructuredLogFormatter
+
+dispatcher:
+  logging:
+    service-name: notification-dispatcher   # shared MicroserviceName value -> LogEvent.serviceName
+    environment: development                 # production | staging | development -> meta.environment
+    version: 1.0.0                           # -> meta.version
+  kafka:
+    decisions-topic: notification.decisions
