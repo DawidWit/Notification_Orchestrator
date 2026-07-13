@@ -5,14 +5,16 @@ import com.dawidwit.dispatcher.domain.DeliveryRecord;
 import com.dawidwit.dispatcher.dto.NotificationDecisionEvent;
 import com.dawidwit.dispatcher.repository.DeliveryRecordRepository;
 import com.dawidwit.dispatcher.service.channel.NotificationChannelSender;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 /**
- * Turns a consumed {@link NotificationDecisionEvent} into one delivery per channel: it enforces
- * idempotency on {@code (eventId, channel)}, records the attempt, and invokes the channel sender.
- * All delivery decisions live here — the Kafka listener stays a thin adapter.
+ * Turns a consumed {@link NotificationDecisionEvent} into one delivery per channel. It enforces
+ * idempotency on {@code (eventId, channel)} — terminal deliveries are skipped, non-terminal ones are
+ * reused across retries so no duplicate rows appear — records each attempt, and invokes the sender.
+ * All delivery decisions live here; the Kafka listener stays a thin adapter.
  */
 @Service
 public class DeliveryService {
@@ -33,36 +35,64 @@ public class DeliveryService {
 				.addKeyValue("eventId", event.eventId())
 				.addKeyValue("channels", event.channels())
 				.log();
+		RuntimeException firstFailure = null;
 		for (Channel channel : event.channels()) {
-			deliver(event, channel);
+			try {
+				deliver(event, channel);
+			} catch (RuntimeException ex) {
+				// Keep delivering the other channels; propagate afterwards so Kafka retries the failed ones.
+				if (firstFailure == null) {
+					firstFailure = ex;
+				}
+			}
+		}
+		if (firstFailure != null) {
+			throw firstFailure;
 		}
 	}
 
 	private void deliver(NotificationDecisionEvent event, Channel channel) {
-		if (repository.findByEventIdAndChannel(event.eventId(), channel).isPresent()) {
+		Optional<DeliveryRecord> existing = repository.findByEventIdAndChannel(event.eventId(), channel);
+		if (existing.isPresent() && existing.get().isTerminal()) {
+			return; // already SENT or DEAD_LETTERED — idempotent skip
+		}
+
+		DeliveryRecord record =
+				existing.orElseGet(
+						() ->
+								new DeliveryRecord(
+										event.eventId(), event.userId(), event.eventType(), channel));
+		NotificationChannelSender sender = senderRegistry.senderFor(channel);
+		try {
+			sender.send(record);
+			record.markSent();
+			repository.save(record);
 			log.atInfo()
-					.setMessage("Skipping already-processed delivery")
+					.setMessage("Delivery sent")
 					.addKeyValue("eventId", event.eventId())
 					.addKeyValue("channel", channel)
 					.log();
-			return;
+		} catch (RuntimeException ex) {
+			// Record the failed attempt, then re-throw so Kafka's non-blocking retry / DLT acts (§4.4).
+			record.markFailed(ex.getMessage());
+			repository.save(record);
+			throw ex;
 		}
+	}
 
-		NotificationChannelSender sender = senderRegistry.senderFor(channel);
-		DeliveryRecord record =
-				repository.save(
-						new DeliveryRecord(event.eventId(), event.userId(), event.eventType(), channel));
-
-		// Throw, don't catch: a failed send must propagate so Kafka's retry/DLT can act on it (§4.4).
-		sender.send(record);
-
-		record.markSent();
-		repository.save(record);
-
-		log.atInfo()
-				.setMessage("Delivery sent")
-				.addKeyValue("eventId", event.eventId())
-				.addKeyValue("channel", channel)
-				.log();
+	/** Marks every not-yet-terminal delivery for an event as dead-lettered; invoked from the DLT. */
+	public void deadLetter(NotificationDecisionEvent event, String reason) {
+		for (DeliveryRecord record : repository.findByEventId(event.eventId())) {
+			if (!record.isTerminal()) {
+				record.markDeadLettered(reason);
+				repository.save(record);
+				log.atWarn()
+						.setMessage("Delivery dead-lettered")
+						.addKeyValue("eventId", event.eventId())
+						.addKeyValue("channel", record.getChannel())
+						.addKeyValue("reason", reason)
+						.log();
+			}
+		}
 	}
 }

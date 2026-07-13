@@ -30,6 +30,8 @@ import org.hibernate.type.SqlTypes;
 						columnNames = {"event_id", "channel"}))
 public class DeliveryRecord {
 
+	private static final int MAX_FAILURE_REASON_LENGTH = 512;
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
@@ -96,6 +98,34 @@ public class DeliveryRecord {
 	public void markSent() {
 		this.attemptCount++;
 		this.status = DeliveryStatus.SENT;
+	}
+
+	/** Records a failed (still retryable) send attempt, counting the attempt. */
+	public void markFailed(String reason) {
+		this.attemptCount++;
+		this.status = DeliveryStatus.FAILED;
+		this.failureReason = truncateReason(reason);
+	}
+
+	/** Marks this delivery permanently failed once retries are exhausted. */
+	public void markDeadLettered(String reason) {
+		this.status = DeliveryStatus.DEAD_LETTERED;
+		if (reason != null && !reason.isBlank()) {
+			this.failureReason = truncateReason(reason);
+		}
+		// otherwise keep the reason captured on the last failed attempt
+	}
+
+	/** Whether this delivery has reached a final state and must not be reprocessed. */
+	public boolean isTerminal() {
+		return this.status == DeliveryStatus.SENT || this.status == DeliveryStatus.DEAD_LETTERED;
+	}
+
+	private static String truncateReason(String reason) {
+		if (reason == null || reason.length() <= MAX_FAILURE_REASON_LENGTH) {
+			return reason;
+		}
+		return reason.substring(0, MAX_FAILURE_REASON_LENGTH);
 	}
 
 	public Long getId() {

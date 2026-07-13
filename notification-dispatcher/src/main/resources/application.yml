@@ -37,3 +37,12 @@ dispatcher:
     version: 1.0.0                           # -> meta.version
   kafka:
     decisions-topic: notification.decisions
+    retry:
+      attempts: "4"                 # 1 initial delivery + 3 retries, then dead-letter
+      initial-delay-ms: "1000"      # exponential backoff: 1s, 2s, 4s
+      multiplier: "2.0"
+      max-delay-ms: "10000"
+  simulation:
+    # Demo/verification hook: senders throw for this eventType so the retry/DLT path can be exercised.
+    # Blank disables it. Normal events use their real eventType and are delivered.
+    failure-event-type: force_failure

@@ -1,28 +1,19 @@
 package com.dawidwit.dispatcher.service.channel;
 
 import com.dawidwit.dispatcher.domain.Channel;
-import com.dawidwit.dispatcher.domain.DeliveryRecord;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-/** Simulated push delivery — logs the attempt. A real push-provider integration is out of scope. */
+/** Simulated push delivery. A real push-provider integration is out of scope. */
 @Component
-public class PushSender implements NotificationChannelSender {
+public class PushSender extends SimulatedChannelSender {
 
-	private static final Logger log = LoggerFactory.getLogger(PushSender.class);
+	public PushSender(@Value("${dispatcher.simulation.failure-event-type:}") String failureEventType) {
+		super(failureEventType);
+	}
 
 	@Override
 	public Channel supports() {
 		return Channel.PUSH;
-	}
-
-	@Override
-	public void send(DeliveryRecord record) {
-		log.atInfo()
-				.setMessage("Simulated push delivery")
-				.addKeyValue("eventId", record.getEventId())
-				.addKeyValue("userId", record.getUserId())
-				.log();
 	}
 }
