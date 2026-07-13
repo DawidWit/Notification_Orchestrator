@@ -8,10 +8,12 @@ import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 /**
- * Data access for {@link DeliveryRecord}. Spring Data derives the implementations of these queries
- * at runtime from their method names.
+ * Data access for {@link DeliveryRecord}. Spring Data derives the simple queries from their method
+ * names; the filtered search and the status aggregation use explicit JPQL.
  */
 public interface DeliveryRecordRepository extends JpaRepository<DeliveryRecord, Long> {
 
@@ -21,6 +23,24 @@ public interface DeliveryRecordRepository extends JpaRepository<DeliveryRecord, 
 	/** The single delivery for an (event, channel) pair — the idempotency lookup. */
 	Optional<DeliveryRecord> findByEventIdAndChannel(String eventId, Channel channel);
 
-	/** Deliveries for a user in a given state, paged for the REST API. */
-	Page<DeliveryRecord> findByUserIdAndStatus(String userId, DeliveryStatus status, Pageable pageable);
+	/** Paged list with optional {@code userId} / {@code status} filters (null = ignore that filter). */
+	@Query(
+			"""
+			SELECT d FROM DeliveryRecord d
+			WHERE (:userId IS NULL OR d.userId = :userId)
+			  AND (:status IS NULL OR d.status = :status)
+			""")
+	Page<DeliveryRecord> search(
+			@Param("userId") String userId, @Param("status") DeliveryStatus status, Pageable pageable);
+
+	/** Delivery counts grouped by status, for the stats endpoint. */
+	@Query("SELECT d.status AS status, COUNT(d) AS count FROM DeliveryRecord d GROUP BY d.status")
+	List<StatusCount> countByStatus();
+
+	/** Projection for {@link #countByStatus()}. */
+	interface StatusCount {
+		DeliveryStatus getStatus();
+
+		long getCount();
+	}
 }
