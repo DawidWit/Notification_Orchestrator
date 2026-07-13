@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: notification-dispatcher
+
+  # Datasource connection comes from environment variables (Spring relaxed binding):
+  #   SPRING_DATASOURCE_URL, SPRING_DATASOURCE_USERNAME, SPRING_DATASOURCE_PASSWORD
+  # Integration tests inject these automatically from Testcontainers via @ServiceConnection.
+
+  jpa:
+    hibernate:
+      ddl-auto: validate        # Flyway owns the schema; Hibernate only validates the mapping against it.
+    open-in-view: false         # No lazy loading outside the service layer; avoids the OSIV anti-pattern.
+    properties:
+      hibernate.jdbc.time_zone: UTC   # Read/write timestamps as UTC regardless of the JVM's default zone.
+
+  flyway:
+    enabled: true               # Runs the migrations in classpath:db/migration on startup.
