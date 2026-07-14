@@ -9,10 +9,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
 
-/**
- * Resolves the correct {@link NotificationChannelSender} for a channel so callers never branch on
- * channel type. Spring injects every sender bean; we index them by the channel each one supports.
- */
+/** Looks up the sender for a channel, so callers never switch on channel type. */
 @Component
 public class ChannelSenderRegistry {
 

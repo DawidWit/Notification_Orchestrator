@@ -4,10 +4,7 @@ import jakarta.validation.ConstraintViolation;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-/**
- * Thrown when an inbound decision event fails Bean Validation. It is excluded from Kafka retries
- * (retrying a malformed message never helps), so such events go straight to the dead-letter topic.
- */
+/** Thrown when a decision event fails validation. Excluded from retries, so it dead-letters straight away. */
 public class InvalidDecisionEventException extends RuntimeException {
 
 	public InvalidDecisionEventException(Set<? extends ConstraintViolation<?>> violations) {

@@ -16,10 +16,8 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
 /**
- * One delivery of a source event to a single channel — the unit that gets sent and retried.
- *
- * <p>The pair {@code (eventId, channel)} is unique (enforced by the database) and acts as the
- * idempotency guard: re-consuming the same source event must never create duplicate rows.
+ * One delivery of an event to a single channel — the unit that gets sent and retried. The
+ * (eventId, channel) pair is unique in the DB, which stops re-consumed events from duplicating.
  */
 @Entity
 @Table(
@@ -59,8 +57,7 @@ public class DeliveryRecord {
 	@Column(name = "failure_reason")
 	private String failureReason;
 
-	// Hibernate maps Instant to SQL Server 'datetimeoffset' by default; pin it to DATETIME2 to match
-	// the migration. Values stay UTC via spring.jpa.properties.hibernate.jdbc.time_zone=UTC.
+	// Pinned to DATETIME2 (Hibernate would default to datetimeoffset) to match the migration; stays UTC.
 	@JdbcTypeCode(SqlTypes.TIMESTAMP)
 	@Column(name = "created_at", nullable = false, updatable = false)
 	private Instant createdAt;

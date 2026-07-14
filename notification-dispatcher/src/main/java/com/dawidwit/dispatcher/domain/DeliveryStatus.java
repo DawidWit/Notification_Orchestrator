@@ -1,9 +1,6 @@
 package com.dawidwit.dispatcher.domain;
 
-/**
- * Lifecycle state of a single {@link DeliveryRecord}. Persisted by name, so these constant names
- * are part of the database contract (see the {@code status} column of {@code delivery_record}).
- */
+/** Lifecycle state of a delivery. Persisted by name, so these names are a DB contract. */
 public enum DeliveryStatus {
 	PENDING,
 	SENT,

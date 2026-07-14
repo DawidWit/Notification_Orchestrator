@@ -16,10 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-/**
- * Read-only REST API over delivery records. Every response is a {@link DeliveryResponse} DTO — JPA
- * entities are never returned. The controller only delegates to the repository and maps to DTOs.
- */
+/** Read-only REST API over delivery records. Always returns DeliveryResponse DTOs, never entities. */
 @RestController
 @RequestMapping("/api/v1/deliveries")
 public class DeliveryController {

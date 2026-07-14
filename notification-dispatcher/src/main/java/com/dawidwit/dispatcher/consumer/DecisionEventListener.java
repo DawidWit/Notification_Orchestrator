@@ -15,12 +15,8 @@ import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 
 /**
- * Consumes notification decisions, validates them, and hands each off to {@link DeliveryService}.
- *
- * <p>Transient failures retry on non-blocking retry topics ({@code @RetryableTopic}); once attempts
- * are exhausted the record lands on the dead-letter topic and {@link #onDecisionDlt} marks the
- * permanent failure. Validation failures are excluded from retries and go straight to the DLT. The
- * listener stays thin — it validates and delegates, with no delivery logic.
+ * Validates each decision and hands it to DeliveryService. Transient failures retry on backoff
+ * topics then dead-letter; validation failures skip retries and dead-letter straight away.
  */
 @Component
 public class DecisionEventListener {

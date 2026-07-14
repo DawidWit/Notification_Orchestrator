@@ -10,12 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-/**
- * Turns a consumed {@link NotificationDecisionEvent} into one delivery per channel. It enforces
- * idempotency on {@code (eventId, channel)} — terminal deliveries are skipped, non-terminal ones are
- * reused across retries so no duplicate rows appear — records each attempt, and invokes the sender.
- * All delivery decisions live here; the Kafka listener stays a thin adapter.
- */
+/** Fans a decision out to one delivery per channel. Idempotent on (eventId, channel). */
 @Service
 public class DeliveryService {
 
@@ -73,7 +68,7 @@ public class DeliveryService {
 					.addKeyValue("channel", channel)
 					.log();
 		} catch (RuntimeException ex) {
-			// Record the failed attempt, then re-throw so Kafka's non-blocking retry / DLT acts (§4.4).
+			// Record the failed attempt, then re-throw so Kafka's non-blocking retry / DLT can act on it.
 			record.markFailed(ex.getMessage());
 			repository.save(record);
 			throw ex;

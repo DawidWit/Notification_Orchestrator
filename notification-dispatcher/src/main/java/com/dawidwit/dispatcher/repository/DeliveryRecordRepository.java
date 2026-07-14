@@ -11,10 +11,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-/**
- * Data access for {@link DeliveryRecord}. Spring Data derives the simple queries from their method
- * names; the filtered search and the status aggregation use explicit JPQL.
- */
+/** Data access for delivery records. Simple lookups come from the method names; the rest are JPQL. */
 public interface DeliveryRecordRepository extends JpaRepository<DeliveryRecord, Long> {
 
 	/** All deliveries produced for one source event (one per channel). */

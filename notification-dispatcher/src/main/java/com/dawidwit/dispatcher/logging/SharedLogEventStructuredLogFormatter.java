@@ -16,14 +16,8 @@ import org.springframework.core.env.Environment;
 import tools.jackson.databind.json.JsonMapper;
 
 /**
- * Renders every console log line as the shared cross-service {@code LogEvent} JSON (mirroring the
- * TypeScript {@code shared} LogFactory), so all services in the system emit one consistent structured
- * format.
- *
- * <p>Registered via {@code logging.structured.format.console}. It is instantiated by the logging
- * system rather than the Spring context, so the static meta values are read from the {@link
- * Environment} at construction. Application code keeps using plain SLF4J; MDC entries become
- * {@code context} and key-value pairs become {@code payload}.
+ * Renders every log line as the shared LogEvent JSON (the same shape the TypeScript services emit):
+ * MDC entries become context, key-value pairs become payload. Wired up via logging.structured.format.console.
  */
 public class SharedLogEventStructuredLogFormatter implements StructuredLogFormatter<ILoggingEvent> {
 

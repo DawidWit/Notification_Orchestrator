@@ -24,10 +24,8 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import tools.jackson.databind.json.JsonMapper;
 
 /**
- * Kafka wiring. Consumer and producer both use Spring's Jackson 3 {@link JsonMapper} (java.time-aware)
- * for JSON, and the broker address comes from {@link KafkaConnectionDetails}. The producer exists so
- * {@code @RetryableTopic} (enabled here) can forward failed records to the retry and dead-letter
- * topics; {@code @EnableKafkaRetryTopic} bootstraps that non-blocking retry infrastructure.
+ * Kafka wiring. Consumer and producer share Spring's Jackson 3 JsonMapper; the producer exists only
+ * so @RetryableTopic can forward failed records to the retry and dead-letter topics.
  */
 @Configuration
 @EnableKafkaRetryTopic
@@ -67,11 +65,7 @@ public class KafkaConfig {
 		return new KafkaTemplate<>(producerFactory);
 	}
 
-	/**
-	 * Scheduler the non-blocking retry infrastructure uses to honour backoff delays. Spring Boot only
-	 * auto-creates a {@code TaskScheduler} when scheduling is enabled, so {@code @RetryableTopic} needs
-	 * one provided explicitly.
-	 */
+	/** Scheduler for retry backoff delays — Boot only auto-creates one when scheduling is enabled. */
 	@Bean
 	RetryTopicSchedulerWrapper retryTopicSchedulerWrapper() {
 		ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();

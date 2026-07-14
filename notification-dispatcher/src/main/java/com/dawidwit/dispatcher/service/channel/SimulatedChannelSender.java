@@ -6,9 +6,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Base for the simulated channel senders: it logs the (fake) delivery and, as a demo/verification
- * hook, throws for a configurable event type so the retry/dead-letter path can be exercised without a
- * real provider. Subclasses only declare which channel they handle via {@link #supports()}.
+ * Base for the fake senders: logs the delivery, and throws for one configurable eventType so we can
+ * exercise the retry/dead-letter path without a real provider.
  */
 public abstract class SimulatedChannelSender implements NotificationChannelSender {
 
