@@ -65,7 +65,10 @@ describe('API Integration Tests', () => {
       const res = await request(app).post('/events').send(eventPayload).expect(202);
 
       expect(res.body.decision).toBe('PROCESS_NOTIFICATION');
-      expect(res.body.channels).toEqual(['email', 'push']);
+      // Contract shared with the Java dispatcher (NotificationDecisionEvent): UPPERCASE channels + eventType + occurredAt.
+      expect(res.body.channels).toEqual(['EMAIL', 'PUSH']);
+      expect(res.body.eventType).toBe('item_shipped');
+      expect(res.body.occurredAt).toBe('2024-07-15T10:00:00Z');
     });
 
     it('should return 200 DO_NOT_NOTIFY when DND is active', async () => {

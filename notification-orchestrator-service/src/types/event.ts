@@ -14,6 +14,17 @@ export type DecisionReason =
   | 'PREFERENCES_DISABLED'
   | 'NO_CHANNELS_CONFIGURED';
 
+// Channels travel UPPERCASE on the wire — the contract the Java dispatcher validates (NotificationDecisionEvent).
+export type WireChannel = 'EMAIL' | 'SMS' | 'PUSH';
+
+const CHANNEL_TO_WIRE: Record<Channel, WireChannel> = {
+  email: 'EMAIL',
+  sms: 'SMS',
+  push: 'PUSH',
+};
+
+export const toWireChannel = (channel: Channel): WireChannel => CHANNEL_TO_WIRE[channel];
+
 export type NotificationDecision =
   | {
       decision: 'DO_NOT_NOTIFY';
@@ -25,5 +36,7 @@ export type NotificationDecision =
       decision: 'PROCESS_NOTIFICATION';
       eventId: string;
       userId: string;
-      channels: Channel[];
+      eventType: string;
+      channels: WireChannel[];
+      occurredAt: string;
     };

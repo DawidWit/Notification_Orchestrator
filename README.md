@@ -116,8 +116,12 @@ Each item in the `NotificationPreferences` table will have the following structu
 
       ```json
       {
-        "message": "PROCESS_NOTIFICATION",
-        ...
+        "decision": "PROCESS_NOTIFICATION",
+        "eventId": "evt_123",
+        "userId": "user_42",
+        "eventType": "item_shipped",
+        "channels": ["EMAIL", "SMS"],
+        "occurredAt": "2024-05-28T10:00:00Z"
       }
       ```
 

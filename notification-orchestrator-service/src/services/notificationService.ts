@@ -1,4 +1,5 @@
 import { getUserPreferences } from './preferenceService.js';
+import { toWireChannel } from '../types/index.js';
 import type { EventPayload, NotificationDecision, DndWindow } from '../types/index.js';
 
 const DAY_NAME_TO_INDEX: Record<string, number> = {
@@ -105,6 +106,8 @@ export const evaluateNotificationDecision = async (event: EventPayload): Promise
     decision: 'PROCESS_NOTIFICATION',
     eventId: event.eventId,
     userId,
-    channels: eventTypePreference.channels,
+    eventType,
+    channels: eventTypePreference.channels.map(toWireChannel),
+    occurredAt: timestamp,
   };
 };
