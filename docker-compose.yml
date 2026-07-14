@@ -26,19 +26,3 @@ services:
       - ./dynamodb_data:/home/dynamodblocal/data
       - /home/dynamodblocal/data
     command: [ "-jar", "DynamoDBLocal.jar", "-sharedDb", "-dbPath", "/home/dynamodblocal/data" ]
-
-  # SQL Database for Logging Service
-  postgres:
-    image: postgres:16-alpine
-    container_name: logging-db-postgres
-    ports:
-      - "5432:5432"
-    environment:
-      - POSTGRES_USER=logging_user
-      - POSTGRES_PASSWORD=logging_pass
-      - POSTGRES_DB=logging_db
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-
-volumes:
-  postgres_data:
