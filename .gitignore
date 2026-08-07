@@ -2,3 +2,5 @@ node_modules
 .env
 lambda.zip
 dist/
+.DS_Store
+.idea
